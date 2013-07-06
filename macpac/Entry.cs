@@ -17,14 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ***************************************************/
 
-using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Management;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Macpac
 {
@@ -182,142 +178,6 @@ namespace Macpac
 			Console.WriteLine("   -show              Show information on the adapter.");
 			Console.WriteLine("   /?                 Display this help message.");
 			Console.ReadKey();
-		}
-	}
-	class RegEdit
-	{
-		const string RegRoot = @"SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}\"; //base path
-		public static void Write(string RegKey, string RegName = null, object RegVal = null)
-		{
-			try
-			{
-				if (RegName == null) Registry.LocalMachine.OpenSubKey(RegRoot, true).CreateSubKey(RegKey);
-				else Registry.LocalMachine.OpenSubKey(RegRoot + RegKey, true).SetValue(RegName, RegVal, RegistryValueKind.String);
-			}
-			catch (Exception e)
-			{
-				if (e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-				else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
-			}
-		}
-		public static void Delete(string RegKey, string RegVal = null)
-		{
-			try
-			{
-				if (RegVal == null) Registry.LocalMachine.OpenSubKey(RegRoot, true).DeleteSubKeyTree(RegKey);
-				else Registry.LocalMachine.OpenSubKey(RegRoot + RegKey, true).DeleteValue(RegVal);
-			}
-			catch (Exception e)
-			{
-				if (e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-				else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
-			}
-		}
-	}
-	class NetworkAdapter //this is where all our network adapter-specific methods are kept
-	{
-		public static ManagementObject Get(string NicID, bool IsIndex) //returns a ManagementObject for the adapter which can then be used to get info and set its name or state
-		{
-			ManagementObject NicObj = null; //initialise to null, if the try fails we still have a value of sorts
-			try
-			{
-				NicObj = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapter WHERE " + (IsIndex ? "Index" : "NetConnectionID") + "='" + NicID + "'").Get().Cast<ManagementObject>().FirstOrDefault();
-			}
-			catch (ManagementException e)
-			{
-				Console.WriteLine("Error {0}: {1}", e.ErrorCode, e.Message);
-				return null;
-			}
-			return NicObj;
-		}
-		public static void SetName(ManagementObject NicObj, string NewName)
-		{
-			if ((NewName != null) && (NewName.Length > 0))
-			{
-				if (!new Regex(@"[\t\\/:\*\?\<\>\|""]|^-").IsMatch(NewName))
-				{
-					try
-					{
-						NicObj["NetConnectionID"] = NewName;
-						NicObj.Put();
-					}
-					catch(Exception e)
-					{
-						switch(e.HResult.ToString("X"))
-						{
-							case "800702E4":
-								Console.WriteLine("Error {0:X8}: You need administrative privileges to do this.", e.HResult);
-								break;
-							case "80070034":
-								Console.WriteLine("Error {0:X8}: Another adapter already has this name.", e.HResult);
-								break;
-						}
-					}
-				}
-				else Console.WriteLine("Error: Connection name cannot contain tabs or any of the following:\n\\ / : * ? < > | \"");
-			}
-			else Console.WriteLine("Error: Connection name cannot be null.");
-		}
-		public static void SetState(ManagementObject NicObj, int State)
-		{
-			if (State == 0 || State == 1) //reset or disable
-			{
-				short DisResult = Convert.ToInt16(NicObj.InvokeMethod("Disable", null));
-				switch (DisResult)
-				{
-					case 0:
-						Console.WriteLine("Disable succeeded.");
-						break;
-					case 5:
-						Console.WriteLine("Error: Permission denied.");
-						if (State == 0) return;
-						break;
-					default:
-						Console.WriteLine("Disable Result: {0}", DisResult);
-						if (State == 0) return;
-						break;
-				}
-				if (State == 0) Thread.Sleep(1000);
-			}
-			if (State == 0 || State == 2) //reset or enable
-			{
-				short EnResult = Convert.ToInt16(NicObj.InvokeMethod("Enable", null));
-				switch (EnResult)
-				{
-					case 0:
-						Console.WriteLine("Enable succeeded.");
-						break;
-					case 5:
-						Console.WriteLine("Error: Permission denied.");
-						break;
-					default:
-						Console.WriteLine("Enable Result: {0}", EnResult);
-						break;
-				}
-			}
-		}
-		public static string FormatAdapterSpeed(ulong Speed)
-		{
-			string[] Ords = { "", "K", "M", "G", "T", "P", "E" };
-			decimal Rate = (decimal)Speed;
-			int i = 0;
-			for (; Rate >= 1000; i++) Rate /= 1000;
-			return Rate.ToString("N2") + " " + Ords[i] + "bps";
-		}
-	}
-	class MacAddress
-	{
-		public static string Generate(bool FixAddr = false)
-		{
-			string Addr = Convert.ToUInt64(new Random().NextDouble().ToString().Substring(2)).ToString("X2").PadLeft(12, '0').Substring(0, 12);
-			if (FixAddr) return Correct(Addr);
-			else return Addr;
-		}
-		public static string Correct(string Addr)
-		{
-			string[] HexDigits = { "2", "6", "A", "E" };
-			if (HexDigits.Contains(Addr.Substring(1, 1))) return Addr.Substring(0, 1) + HexDigits[new Random().Next(0, 3)] + Addr.Substring(2);
-			else return Addr;
 		}
 	}
 }
