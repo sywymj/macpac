@@ -48,7 +48,7 @@ namespace Macpac
 						ManagementObject NicObj = NetworkAdapter.Get(Args[1], (Args[0] == "-id") ? true : false);
 						if(NicObj == null)
 						{
-							Console.WriteLine("Error: Invalid {0} specified.", (Args[0] == "-id") ? "adapter ID" : "connection name"); //get rid
+							Console.WriteLine("Error: Invalid adapter name or ID specified.");
 							return 3; //Invalid adapter
 						}
 						for(int i = 2; i < Args.Length; i++) //iterate through the rest of the arguments - ignore -i <...>
@@ -63,17 +63,23 @@ namespace Macpac
 										{
 											if(Addr == "random") Addr = MacAddress.Generate();
 											if(!Args.Contains("-nofix")) Addr = MacAddress.Correct(Addr);
-											Console.WriteLine("Setting {0}...", Addr);
+											Console.WriteLine("Setting {0} for {1}...", Addr, NicObj["NetConnectionID"]);
 											try
 											{
 												RegEdit.Write(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress", Addr);
+												Console.WriteLine("Successfully set MAC address.");
 											}
 											catch(Exception e)
 											{
 												if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
 												else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
+												return 12; //Set MAC failed
 											}
-											if(!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
+											if(!Args.Contains("-noreset"))
+											{
+												Console.WriteLine("Resetting {0}...", NicObj["NetConnectionID"]);
+												NetworkAdapter.SetState(NicObj, 0);
+											}
 										}
 										else
 										{
@@ -83,25 +89,27 @@ namespace Macpac
 									}
 									else
 									{
-										Console.WriteLine("Error: No MAC Address specified.");
+										Console.WriteLine("Error: No MAC address specified.");
 										return 4; //No MAC
 									}
 									break;
 								case "-u":
-									Console.WriteLine("Unsetting...");
+									Console.WriteLine("Unsetting MAC address of {0}...", NicObj["NetConnectionID"]);
 									try
 									{
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress");
+										Console.WriteLine("Successfully unset MAC address.");
 									}
 									catch(Exception e)
 									{
 										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
 										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
+										return 11; //Unset MAC failed
 									}
 									if (!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
 									break;
 								case "-add":
-									Console.WriteLine("Adding Network Address parameter...");
+									Console.WriteLine("Adding Network Address parameter for {0}...", NicObj["NetConnectionID"]);
 									string Param = NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress";
 									try
 									{
@@ -111,37 +119,35 @@ namespace Macpac
 										RegEdit.Write(Param, "ParamDesc", "NetworkAddress");
 										RegEdit.Write(Param, "type", "edit");
 										RegEdit.Write(Param, "UpperCase", "1");
+										Console.WriteLine("Successfully added Network Address parameter.");
 									}
 									catch(Exception e)
 									{
 										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
 										else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
+										return 10; //Add Network Address parameter failed
 									}
 									break;
 								case "-del":
-									Console.WriteLine("Deleting Network Address parameter...");
+									Console.WriteLine("Deleting Network Address parameter for {0}...", NicObj["NetConnectionID"]);
 									try
 									{
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress");
+										Console.WriteLine("Successfully deleted Network Address parameter.");
 									}
 									catch(Exception e)
 									{
 										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
 										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
+										return 9; //Delete Network Address parameter failed
 									}
 									break;
 								case "-n":
 									if(Args.Length > i + 1)
 									{
-										Console.WriteLine("Renaming \"{0}\" to \"{1}\"...", NicObj["NetConnectionID"], Args[i + 1]);
-										if(NetworkAdapter.SetName(NicObj, Args[i + 1]))
-										{
-											Console.WriteLine("Successfully renamed the network adapter.");
-										}
-										else
-										{
-											return 8; //Adapter name change failed
-										}
+										Console.WriteLine("Renaming '{0}' to '{1}'...", NicObj["NetConnectionID"], Args[i + 1]);
+										if(NetworkAdapter.SetName(NicObj, Args[i + 1])) Console.WriteLine("Successfully renamed the network adapter.");
+										else return 8; //Adapter name change failed
 									}
 									else
 									{

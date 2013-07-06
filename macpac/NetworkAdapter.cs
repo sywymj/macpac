@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Macpac
 {
-	class NetworkAdapter //this is where all our network adapter-specific methods are kept
+	class NetworkAdapter
 	{
 		public static ManagementObject Get(string NicID, bool IsIndex) //returns a ManagementObject for the adapter which can then be used to get info and set its name or state
 		{
@@ -78,7 +78,7 @@ namespace Macpac
 						if(State == 0) return false;
 						break;
 					default:
-						Console.WriteLine("Disable Result: {0}", DisResult);
+						Console.WriteLine("Error: Disable result: {0}", DisResult);
 						if(State == 0) return false;
 						break;
 				}
@@ -96,7 +96,7 @@ namespace Macpac
 						Console.WriteLine("Error: Permission denied.");
 						return false;
 					default:
-						Console.WriteLine("Enable Result: {0}", EnResult);
+						Console.WriteLine("Error: Enable result: {0}", EnResult);
 						return false;
 				}
 			}
