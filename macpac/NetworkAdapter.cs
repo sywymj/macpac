@@ -63,7 +63,7 @@ namespace Macpac
 			}
 			return true;
 		}
-		public static void SetState(ManagementObject NicObj, int State)
+		public static bool SetState(ManagementObject NicObj, int State)
 		{
 			if(State == 0 || State == 1) //reset or disable
 			{
@@ -75,11 +75,11 @@ namespace Macpac
 						break;
 					case 5:
 						Console.WriteLine("Error: Permission denied.");
-						if(State == 0) return;
+						if(State == 0) return false;
 						break;
 					default:
 						Console.WriteLine("Disable Result: {0}", DisResult);
-						if(State == 0) return;
+						if(State == 0) return false;
 						break;
 				}
 				if(State == 0) Thread.Sleep(1000);
@@ -94,12 +94,13 @@ namespace Macpac
 						break;
 					case 5:
 						Console.WriteLine("Error: Permission denied.");
-						break;
+						return false;
 					default:
 						Console.WriteLine("Enable Result: {0}", EnResult);
-						break;
+						return false;
 				}
 			}
+			return true;
 		}
 		public static string FormatAdapterSpeed(ulong Speed)
 		{

@@ -29,43 +29,51 @@ namespace Macpac
 		public static int Main(string[] Args)
 		{
 			Console.WriteLine("\nMACPAC: MAC/Physical Address Changer\n");
-			if (Args.Length > 0) //if we have args
+			if(Args.Length > 0) //if we have args
 			{
-				if (Args.Contains("/?"))
+				if(Args.Contains("/?"))
 				{
 					ShowHelp();
 					return 0; //OK
 				}
-				else if (Args.Contains("-gen"))
+				else if(Args.Contains("-gen"))
 				{
 					Console.WriteLine("Generated " + MacAddress.Generate((Args.Contains("-nofix")) ? true : false));
 					return 0; //OK
 				}
-				if ((Args[0] == "-i" || Args[0] == "-id") && (Args.Length > 1)) //-i or -id must be the first argument and it must have an argument after it
+				if((Args[0] == "-i" || Args[0] == "-id") && (Args.Length > 1)) //-i or -id must be the first argument and it must have an argument after it
 				{
-					if (Args.Length > 2)
+					if(Args.Length > 2)
 					{
 						ManagementObject NicObj = NetworkAdapter.Get(Args[1], (Args[0] == "-id") ? true : false);
-						if (NicObj == null)
+						if(NicObj == null)
 						{
 							Console.WriteLine("Error: Invalid {0} specified.", (Args[0] == "-id") ? "adapter ID" : "connection name"); //get rid
 							return 3; //Invalid adapter
 						}
-						for (int i = 2; i < Args.Length; i++) //iterate through the rest of the arguments - ignore -i <...>
+						for(int i = 2; i < Args.Length; i++) //iterate through the rest of the arguments - ignore -i <...>
 						{
 							switch(Args[i])
 							{
 								case "-s":
-									if (Args.Length > i + 1) //check that -s is not the last argument
+									if(Args.Length > i + 1) //check that -s is not the last argument
 									{
 										string Addr = Args[i + 1];
-										if (new Regex(@"^([\da-fA-F]{12}|random)").IsMatch(Addr)) //valid mac address or "random" parameter
+										if(new Regex(@"^([\da-fA-F]{12}|random)").IsMatch(Addr)) //valid mac address or "random" parameter
 										{
-											if (Addr == "random") Addr = MacAddress.Generate();
-											if (!Args.Contains("-nofix")) Addr = MacAddress.Correct(Addr);
+											if(Addr == "random") Addr = MacAddress.Generate();
+											if(!Args.Contains("-nofix")) Addr = MacAddress.Correct(Addr);
 											Console.WriteLine("Setting {0}...", Addr);
-											RegEdit.Write(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress", Addr);
-											if (!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
+											try
+											{
+												RegEdit.Write(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress", Addr);
+											}
+											catch(Exception e)
+											{
+												if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
+												else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
+											}
+											if(!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
 										}
 										else
 										{
@@ -81,28 +89,59 @@ namespace Macpac
 									break;
 								case "-u":
 									Console.WriteLine("Unsetting...");
-									RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress");
+									try
+									{
+										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress");
+									}
+									catch(Exception e)
+									{
+										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
+										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
+									}
 									if (!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
 									break;
 								case "-add":
 									Console.WriteLine("Adding Network Address parameter...");
 									string Param = NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress";
-									RegEdit.Write(Param, "Default", "");
-									RegEdit.Write(Param, "LimitText", "12");
-									RegEdit.Write(Param, "Optional", "1");
-									RegEdit.Write(Param, "ParamDesc", "NetworkAddress");
-									RegEdit.Write(Param, "type", "edit");
-									RegEdit.Write(Param, "UpperCase", "1");
+									try
+									{
+										RegEdit.Write(Param, "Default", "");
+										RegEdit.Write(Param, "LimitText", "12");
+										RegEdit.Write(Param, "Optional", "1");
+										RegEdit.Write(Param, "ParamDesc", "NetworkAddress");
+										RegEdit.Write(Param, "type", "edit");
+										RegEdit.Write(Param, "UpperCase", "1");
+									}
+									catch(Exception e)
+									{
+										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
+										else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
+									}
 									break;
 								case "-del":
 									Console.WriteLine("Deleting Network Address parameter...");
-									RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress");
+									try
+									{
+										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress");
+									}
+									catch(Exception e)
+									{
+										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
+										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
+									}
 									break;
 								case "-n":
-									if (Args.Length > i + 1)
+									if(Args.Length > i + 1)
 									{
 										Console.WriteLine("Renaming \"{0}\" to \"{1}\"...", NicObj["NetConnectionID"], Args[i + 1]);
-										NetworkAdapter.SetName(NicObj, Args[i + 1]);
+										if(NetworkAdapter.SetName(NicObj, Args[i + 1]))
+										{
+											Console.WriteLine("Successfully renamed the network adapter.");
+										}
+										else
+										{
+											return 8; //Adapter name change failed
+										}
 									}
 									else
 									{
@@ -154,7 +193,7 @@ namespace Macpac
 				ShowHelp();
 				return 1; //No arguments
 			}
-			if (Args.Contains("-keep")) Console.ReadKey();
+			if(Args.Contains("-keep")) Console.ReadKey();
 			return 0; //OK
 		}
 		static void ShowHelp()
@@ -177,7 +216,6 @@ namespace Macpac
 			Console.WriteLine("   -e                 Enable the specified network adapter.");
 			Console.WriteLine("   -show              Show information on the adapter.");
 			Console.WriteLine("   /?                 Display this help message.");
-			Console.ReadKey();
 		}
 	}
 }
