@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using System;
 using System.Linq;
 using System.Management;
-using System.Text.RegularExpressions;
 
 namespace Macpac
 {
@@ -59,7 +58,7 @@ namespace Macpac
 									if(Args.Length > i + 1) //check that -s is not the last argument
 									{
 										string Addr = Args[i + 1];
-										if(new Regex(@"^([\da-fA-F]{12}|random)").IsMatch(Addr)) //valid mac address or "random" parameter
+										if(MacAddress.Validate(Addr) || Addr == "random") //valid mac address or "random" parameter
 										{
 											if(Addr == "random") Addr = MacAddress.Generate();
 											if(!Args.Contains("-nofix")) Addr = MacAddress.Correct(Addr);
@@ -69,10 +68,8 @@ namespace Macpac
 												RegEdit.Write(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress", Addr);
 												Console.WriteLine("Successfully set MAC address.");
 											}
-											catch(Exception e)
+											catch
 											{
-												if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-												else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
 												return 12; //Set MAC failed
 											}
 											if(!Args.Contains("-noreset"))
@@ -100,10 +97,8 @@ namespace Macpac
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress");
 										Console.WriteLine("Successfully unset MAC address.");
 									}
-									catch(Exception e)
+									catch
 									{
-										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
 										return 11; //Unset MAC failed
 									}
 									if (!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
@@ -121,10 +116,8 @@ namespace Macpac
 										RegEdit.Write(Param, "UpperCase", "1");
 										Console.WriteLine("Successfully added Network Address parameter.");
 									}
-									catch(Exception e)
+									catch
 									{
-										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegWrite Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-										else Console.WriteLine("RegWrite Error {0}: {1}", e.HResult, e.Message);
 										return 10; //Add Network Address parameter failed
 									}
 									break;
@@ -135,10 +128,8 @@ namespace Macpac
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress");
 										Console.WriteLine("Successfully deleted Network Address parameter.");
 									}
-									catch(Exception e)
+									catch
 									{
-										if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("RegDelete Error: Permission denied.\n{0}: {1}", e.HResult, e.Message);
-										else Console.WriteLine("RegDelete Error {0}: {1}", e.HResult, e.Message);
 										return 9; //Delete Network Address parameter failed
 									}
 									break;
