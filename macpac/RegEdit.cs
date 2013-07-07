@@ -1,11 +1,3 @@
-﻿/****************************************************\
- * RegEdit.cs                                       *
- * Description: Registry manipulation tools         *
- * Constants: string RegRoot                        *
- * Methods: void Write, void Delete                 *
- *                                                  *
-\****************************************************/
-
 using Microsoft.Win32;
 using System;
 

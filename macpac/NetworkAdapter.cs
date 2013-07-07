@@ -1,11 +1,3 @@
-﻿/****************************************************\
- * NetworkAdapter.cs                                *
- * Description: Network adapter-specific methods    *
- * Methods: ManagementObject Get, bool SetName,     *
- *          bool SetState, string FormatSpeed       *
- *                                                  *
-\****************************************************/
-
 using System;
 using System.Linq;
 using System.Management;

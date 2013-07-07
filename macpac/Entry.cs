@@ -1,11 +1,3 @@
-/****************************************************\
- * Entry.cs                                         *
- * Description: Entry point for macpac              *
- * Methods: int Main, void ShowHelp                 *
- *                                                  *
- *                                                  *
-\****************************************************/
-
 using System;
 using System.Linq;
 using System.Management;
@@ -24,7 +16,7 @@ namespace Macpac
 					ShowHelp();
 					return 0; //OK
 				}
-				else if(Args.Contains("-gen"))
+				else if(Args.Contains("-g"))
 				{
 					Console.WriteLine("Generated " + MacAddress.Generate((Args.Contains("-nofix")) ? true : false));
 					return 0; //OK
@@ -190,7 +182,7 @@ namespace Macpac
 			Console.WriteLine("   -i[d] <adapter>    The network adapter's Network Connections name or ID.");
 			Console.WriteLine("   -s <MAC> | random  Set the adapter's MAC address.");
 			Console.WriteLine("   -u                 Unset the custom MAC address (if any).");
-			Console.WriteLine("   -gen               Generate a random MAC address.");
+			Console.WriteLine("   -g                 Generate a random MAC address.");
 			Console.WriteLine("   -nofix             Don't force locally administered unicast address.");
 			Console.WriteLine("   -noreset           Suppress adapter reset after successful MAC set/unset.");
 			Console.WriteLine("   -add               Add Network Address property to adapter configuration");
