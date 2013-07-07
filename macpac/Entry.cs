@@ -23,14 +23,14 @@ namespace Macpac
 				}
 				if((Args[0] == "-i" || Args[0] == "-id") && (Args.Length > 1)) //-i or -id must be the first argument and it must have an argument after it
 				{
+					ManagementObject NicObj = NetworkAdapter.Get(Args[1], (Args[0] == "-id"));
+					if(NicObj == null)
+					{
+						Console.WriteLine("Error: Invalid adapter name or ID specified.");
+						return 3; //Invalid adapter
+					}
 					if(Args.Length > 2)
 					{
-						ManagementObject NicObj = NetworkAdapter.Get(Args[1], (Args[0] == "-id"));
-						if(NicObj == null)
-						{
-							Console.WriteLine("Error: Invalid adapter name or ID specified.");
-							return 3; //Invalid adapter
-						}
 						for(int i = 2; i < Args.Length; i++) //iterate through the rest of the arguments - ignore -i <...>
 						{
 							switch(Args[i])
