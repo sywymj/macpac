@@ -1,4 +1,12 @@
-﻿using System;
+﻿/****************************************************\
+ * MacAddress.cs                                    *
+ * Description: MAC address generation/validation   *
+ * Methods: string Generate, string Correct,        *
+ *          string Validate                         *
+ *                                                  *
+\****************************************************/
+
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 

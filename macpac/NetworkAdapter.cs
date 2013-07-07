@@ -1,4 +1,12 @@
-﻿using System;
+﻿/****************************************************\
+ * NetworkAdapter.cs                                *
+ * Description: Network adapter-specific methods    *
+ * Methods: ManagementObject Get, bool SetName,     *
+ *          bool SetState, string FormatSpeed       *
+ *                                                  *
+\****************************************************/
+
+using System;
 using System.Linq;
 using System.Management;
 using System.Text.RegularExpressions;
@@ -102,7 +110,7 @@ namespace Macpac
 			}
 			return true;
 		}
-		public static string FormatAdapterSpeed(ulong Speed)
+		public static string FormatSpeed(ulong Speed)
 		{
 			string[] Ords = { "", "K", "M", "G", "T", "P", "E" };
 			decimal Rate = (decimal)Speed;
