@@ -8,16 +8,17 @@ namespace Macpac
 {
 	class NetworkAdapter
 	{
-		public static ManagementObject Get(string NicID, bool IsIndex) //returns a ManagementObject for the adapter which can then be used to get info and set its name or state
+		public static ManagementObject Get(string NicID, bool IsIndex)
 		{
 			ManagementObject NicObj = null; //initialise to null, if the try fails we still have a value of sorts
+			string Query="SELECT * FROM Win32_NetworkAdapter WHERE " + (IsIndex ? "Index" : "NetConnectionID") + "='" + NicID + "'";
 			try
 			{
-				NicObj = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapter WHERE " + (IsIndex ? "Index" : "NetConnectionID") + "='" + NicID + "'").Get().Cast<ManagementObject>().FirstOrDefault();
+				NicObj = new ManagementObjectSearcher(Query).Get().Cast<ManagementObject>().FirstOrDefault();
 			}
 			catch(ManagementException e)
 			{
-				Console.WriteLine("Error {0}: {1}", e.ErrorCode, e.Message);
+				Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 				return null;
 			}
 			return NicObj;
