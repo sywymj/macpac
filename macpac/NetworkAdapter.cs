@@ -11,7 +11,7 @@ namespace Macpac
 		public static ManagementObject Get(string NicID, bool IsIndex)
 		{
 			ManagementObject NicObj = null; //initialise to null, if the try fails we still have a value of sorts
-			string Query="SELECT * FROM Win32_NetworkAdapter WHERE " + (IsIndex ? "Index" : "NetConnectionID") + "='" + NicID + "'";
+			string Query = String.Format("SELECT * FROM Win32_NetworkAdapter WHERE {0}='{1}'", (IsIndex ? "Index" : "NetConnectionID"), NicID);
 			try
 			{
 				NicObj = new ManagementObjectSearcher(Query).Get().Cast<ManagementObject>().FirstOrDefault();
