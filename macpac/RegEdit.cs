@@ -13,10 +13,11 @@ namespace Macpac
 				if(RegName == null) Registry.LocalMachine.OpenSubKey(RegRoot, true).CreateSubKey(RegKey);
 				else Registry.LocalMachine.OpenSubKey(RegRoot + RegKey, true).SetValue(RegName, RegVal, RegistryValueKind.String);
 			}
-			catch(Exception e)
+			catch
 			{
-				throw e;
+				throw;
 			}
+			return;
 		}
 		public static void Delete(string RegKey, string RegVal = null)
 		{
@@ -25,10 +26,11 @@ namespace Macpac
 				if(RegVal == null) Registry.LocalMachine.OpenSubKey(RegRoot, true).DeleteSubKeyTree(RegKey);
 				else Registry.LocalMachine.OpenSubKey(RegRoot + RegKey, true).DeleteValue(RegVal);
 			}
-			catch(Exception e)
+			catch
 			{
-				throw e;
+				throw;
 			}
+			return;
 		}
 	}
 }

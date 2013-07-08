@@ -198,6 +198,7 @@ namespace Macpac
 			Console.WriteLine("   -e                 Enable the specified network adapter.");
 			Console.WriteLine("   -show              Show information on the adapter.");
 			Console.WriteLine("   /?                 Display this help message.");
+			return;
 		}
 	}
 }
