@@ -49,8 +49,9 @@ namespace Macpac
 												RegEdit.Write(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress", Addr);
 												Console.WriteLine("Successfully set MAC address.");
 											}
-											catch
+											catch(Exception e)
 											{
+												Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 												return 12; //Set MAC failed
 											}
 											if(!Args.Contains("-noreset"))
@@ -78,8 +79,9 @@ namespace Macpac
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\", "NetworkAddress");
 										Console.WriteLine("Successfully unset MAC address.");
 									}
-									catch
+									catch(Exception e)
 									{
+										Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 										return 11; //Unset MAC failed
 									}
 									if (!Args.Contains("-noreset")) NetworkAdapter.SetState(NicObj, 0);
@@ -97,8 +99,9 @@ namespace Macpac
 										RegEdit.Write(Param, "UpperCase", "1");
 										Console.WriteLine("Successfully added Network Address parameter.");
 									}
-									catch
+									catch(Exception e)
 									{
+										Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 										return 10; //Add Network Address parameter failed
 									}
 									break;
@@ -109,8 +112,9 @@ namespace Macpac
 										RegEdit.Delete(NicObj["Index"].ToString().PadLeft(4, '0') + "\\Ndi\\Params\\NetworkAddress");
 										Console.WriteLine("Successfully deleted Network Address parameter.");
 									}
-									catch
+									catch(Exception e)
 									{
+										Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 										return 9; //Delete Network Address parameter failed
 									}
 									break;

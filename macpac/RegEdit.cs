@@ -15,8 +15,6 @@ namespace Macpac
 			}
 			catch(Exception e)
 			{
-				if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
-				else Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 				throw e;
 			}
 		}
@@ -29,8 +27,6 @@ namespace Macpac
 			}
 			catch(Exception e)
 			{
-				if(e is System.Security.SecurityException || e is UnauthorizedAccessException) Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
-				else Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
 				throw e;
 			}
 		}
