@@ -19,11 +19,13 @@ namespace Macpac
 				else if(Args.Contains("-g"))
 				{
 					Console.WriteLine("Generated " + MacAddress.Generate((Args.Contains("-nofix"))));
+					if(Args.Contains("-keep")) Console.ReadKey();
 					return 0; //OK
 				}
 				if((Args[0] == "-i" || Args[0] == "-id") && (Args.Length > 1)) //-i or -id must be the first argument and it must have an argument after it
 				{
-					ManagementObject NicObj = NetworkAdapter.Get(Args[1], (Args[0] == "-id"));
+					ManagementObject NicObj;
+					NetworkAdapter.Get(out NicObj, Args[1], (Args[0] == "-id"));
 					if(NicObj == null)
 					{
 						Console.WriteLine("Error: Invalid adapter name or ID specified.");
@@ -122,6 +124,7 @@ namespace Macpac
 									if(Args.Length > i + 1)
 									{
 										Console.WriteLine("Renaming '{0}' to '{1}'...", NicObj["NetConnectionID"], Args[i + 1]);
+										NetworkAdapter.SetName(NicObj, Args[i + 1]);
 										if(NetworkAdapter.SetName(NicObj, Args[i + 1])) Console.WriteLine("Successfully renamed the network adapter.");
 										else return 8; //Adapter name change failed
 									}
@@ -198,7 +201,6 @@ namespace Macpac
 			Console.WriteLine("   -e                 Enable the specified network adapter.");
 			Console.WriteLine("   -show              Show information on the adapter.");
 			Console.WriteLine("   /?                 Display this help message.");
-			return;
 		}
 	}
 }

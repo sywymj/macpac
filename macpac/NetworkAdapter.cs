@@ -8,9 +8,8 @@ namespace Macpac
 {
 	class NetworkAdapter
 	{
-		public static ManagementObject Get(string NicID, bool IsIndex)
+		public static bool Get(out ManagementObject NicObj, string NicID, bool IsIndex)
 		{
-			ManagementObject NicObj = null; //initialise to null, if the try fails we still have a value of sorts
 			string Query = String.Format("SELECT * FROM Win32_NetworkAdapter WHERE {0}='{1}'", (IsIndex ? "Index" : "NetConnectionID"), NicID);
 			try
 			{
@@ -19,9 +18,10 @@ namespace Macpac
 			catch(ManagementException e)
 			{
 				Console.WriteLine("Error {0:X8}: {1}", e.HResult, e.Message);
-				return null;
+				NicObj = null;
+				return false;
 			}
-			return NicObj;
+			return true;
 		}
 		public static bool SetName(ManagementObject NicObj, string NewName)
 		{
@@ -54,13 +54,11 @@ namespace Macpac
 				else
 				{
 					Console.WriteLine("Error: Connection name cannot contain tabs or any of the following:\n\\ / : * ? < > | \"");
-					return false;
 				}
 			}
 			else
 			{
 				Console.WriteLine("Error: Connection name cannot be null.");
-				return false;
 			}
 			return true;
 		}

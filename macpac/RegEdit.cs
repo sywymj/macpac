@@ -17,7 +17,6 @@ namespace Macpac
 			{
 				throw;
 			}
-			return;
 		}
 		public static void Delete(string RegKey, string RegVal = null)
 		{
@@ -30,7 +29,6 @@ namespace Macpac
 			{
 				throw;
 			}
-			return;
 		}
 	}
 }
